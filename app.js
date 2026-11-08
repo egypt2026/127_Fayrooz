@@ -28,6 +28,7 @@ async function load(){
  render()}
 const cum=m=>(D.s.schedule||[]).slice(0,m).reduce((a,b)=>a+(+b),0);
 const monthsNow=()=>{const d=new Date();return d.getFullYear()>2026?12:d.getFullYear()<2026?0:d.getMonth()+1};
+const c25=m=>[270,30,30,30,30,50,50,50,50,50,50,50].slice(0,m).reduce((a,b)=>a+b,0);
 const adj=()=>+D.s.adjustment||0;
 
 function boot(){
@@ -79,8 +80,8 @@ function render(){
 function report(){
  const st=RM+"-01",[y,m]=RM.split("-").map(Number),en=m==12?(y+1)+"-01-01":y+"-"+String(m+1).padStart(2,"0")+"-01";
  const bf=a=>a.filter(x=>x.date<st),im=a=>a.filter(x=>x.date>=st&&x.date<en);
- const op=adj()+sum(bf(D.P))+sum(bf(D.A))-sum(bf(D.E)),mp=im(D.P),ma=im(D.A),me=im(D.E),tp=sum(mp),ta=sum(ma),te=sum(me),end=op+tp+ta-te;
- const dueM=y==2026?(+D.s.due25||0)+cum(m):y>2026?(+D.s.due25||0)+cum(12):0;
+ const op=(y>=2026?adj():0)+sum(bf(D.P))+sum(bf(D.A))-sum(bf(D.E)),mp=im(D.P),ma=im(D.A),me=im(D.E),tp=sum(mp),ta=sum(ma),te=sum(me),end=op+tp+ta-te;
+ const dueM=y==2025?c25(m):y==2026?(+D.s.due25||0)+cum(m):y>2026?(+D.s.due25||0)+cum(12):0;
  const late=APTS.map((a,i)=>({n:i+1,name:a[1],d:dueM-sum(D.P.filter(p=>+p.apt===i+1&&p.date<en))})).filter(x=>x.d>0);
  const by={};mp.forEach(p=>by[p.apt]=(by[p.apt]||0)+(+p.amount));const pk=Object.keys(by);
  let t="📊 تقرير صندوق العمارة – "+MN[m-1]+" "+y+"\n\nرصيد أول الشهر: "+fmt(op)+"\nالمدفوع: "+fmt(tp)+"\nالإضافات: "+fmt(ta)+"\nالمصروفات: "+fmt(te)+"\n✅ رصيد آخر الشهر: "+fmt(end)+" ج";
@@ -91,7 +92,7 @@ function report(){
  window._t=t;
  const li=(a,c)=>a.length?a.map(x=>`<div class="it"><div class="m"><b>${esc(x.description)}</b><div class="s">${esc(x.date)}</div></div><div class="n ${c}">${fmt(x.amount)}</div></div>`).join(""):'<p class="note">لا يوجد</p>';
  const row=(k,v,c)=>`<div class="it"><div class="m"><b>${k}</b></div><div class="n ${c}">${v}</div></div>`;
- return `<div class="bar"><b>تقرير شهر</b><input type="month" id="rm" min="2026-01" value="${RM}" style="width:auto"></div>
+ return `<div class="bar"><b>تقرير شهر</b><input type="month" id="rm" min="2025-01" value="${RM}" style="width:auto"></div>
  <div class="row3"><div class="k">أول الشهر<b>${fmt(op)}</b></div><div class="k">المدفوع + الإضافات<b class="ok">+${fmt(tp+ta)}</b></div><div class="k">المصروفات<b class="late">−${fmt(te)}</b></div></div>
  <div class="hero" style="margin-bottom:10px">رصيد آخر الشهر<b>${fmt(end)} ج</b></div>
  <div class="btns" style="margin-bottom:12px"><a class="a" style="background:#25a244" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(t)}">📲 مشاركة على واتساب</a><button class="c" id="cp">نسخ التقرير</button></div>
