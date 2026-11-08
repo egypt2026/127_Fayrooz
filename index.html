@@ -1,49 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>صندوق العمارة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#1f7a4d">
 <link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>
-:root{--bg:#f6f7f4;--card:#fff;--tx:#1d2420;--mu:#6b756f;--bd:#dfe4de;--ac:#1f7a4d;--rd:#c0392b;--gn:#e6f4ec;--rb:#fbe9e7}
-@media(prefers-color-scheme:dark){:root{--bg:#141816;--card:#1e2421;--tx:#eef2ee;--mu:#9aa59e;--bd:#323b36;--ac:#4cc58a;--rd:#ff7b6b;--gn:#1d3328;--rb:#3a2321}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding:12px;max-width:640px;margin:auto}
-h1{font-size:20px;margin:6px 0 12px}
-.hero{background:var(--ac);color:#fff;border-radius:16px;padding:16px;text-align:center}.hero b{display:block;font-size:34px;margin-top:4px}
-.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
-.k{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px;text-align:center;font-size:12px;color:var(--mu)}.k b{display:block;font-size:16px;color:var(--tx)}
-.tabs{display:flex;gap:6px;margin:10px 0}.tabs button{flex:1;padding:10px 4px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-size:14px}.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-.it{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
-.it .m{flex:1;min-width:0}.it .s{font-size:12px;color:var(--mu)}
-.n{font-weight:700;white-space:nowrap}.late{color:var(--rd)}.ok{color:var(--ac)}
-.pill{font-size:12px;padding:3px 8px;border-radius:99px;background:var(--gn);color:var(--ac);white-space:nowrap}.pill.l{background:var(--rb);color:var(--rd)}
-.bar{display:flex;justify-content:space-between;margin:4px 0 8px}
-.note{font-size:12px;color:var(--mu);text-align:center;margin:10px 0}
-</style></head><body>
-<h1>🏢 صندوق العمارة</h1>
-<div class="hero">رصيد الصندوق الحالي<b id="bal"></b></div>
-<div class="row3"><div class="k">إجمالي المدفوع<b id="tp"></b></div><div class="k">الإضافات<b id="ta"></b></div><div class="k">المصروفات<b id="te"></b></div></div>
-<div class="tabs"><button data-t="apt" class="on">الشقق</button><button data-t="exp">المصروفات</button><button data-t="add">الإضافات</button></div>
-<div id="list"></div><p class="note" id="nt"></p>
-<script>
-// ===== البيانات: عدّل هنا فقط عند التحديث =====
-const UPDATED="6 نوفمبر 2026", ADJ=-50, DUE_NOW=1440;
-const APTS=[["الأرضي","إسلام"],["الأرضي","صابر حسن"],["الأرضي","عاطف"],["الأرضي","إسلام خالد"],["الأول","مايكل"],["الأول","محمد زكريا"],["الأول","أيمن محمدين"],["الأول","حسام خشانة"],["الثاني","أحمد المصري"],["الثاني","رامي جمال محمود"],["الثاني","محمد سيد"],["الثاني","عماد عز الدين"],["الثالث","أحمد ناصر"],["الثالث","مدام سعاد"],["الثالث","ناصر عبدالظاهر"],["الثالث","إبراهيم معتز"],["الرابع","مدام رضوى"],["الرابع","حماده علي"],["الرابع","محمد علي"],["الرابع","هاني عبدالعزيز"],["الخامس","إسلام سيد"],["الخامس","خالد أحمد"],["الخامس","خليفة"],["الخامس","عماد حنا"]];
-const P25=[740,740,740,740,740,310,640,740,740,540,740,740,740,50,500,740,590,740,600,740,270,740,600,740];
-const P26=[450,650,460,460,0,450,0,460,450,0,450,360,500,650,500,1150,0,1000,200,550,300,460,0,460];
-const E=[["2025-01-01","تركيب شباك حديد للسلم + ماكينة للباب",2700],["2025-02-27","شحن عداد السلم",100],["2025-06-19","إصلاح الدفاش 120 خراطة + 30 مواصلات",150],["2025-08-18","تقوية تقفيصة العدادات",300],["2025-08-21","دهان تقفيصة العدادات",480],["2025-08-28","كالون للباب بنسخ إضافية",750],["2025-08-28","عدد 5 أقفال",1400],["2026-05-31","تنظيف شبابيك السلم وتسليك البلاعة",140],["2026-06-06","كالون سمارت",6100],["2026-07-01","عمل 5 نسخ مفتاح طوارئ",100]];
-const A=[["2026-02-11","باقي فلوس فرع الليد",440]];
-// ===============================================
-const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString("en-US"),S=a=>a.reduce((t,x)=>t+x,0);
-const tp=S(P25)+S(P26),te=S(E.map(x=>x[2])),ta=S(A.map(x=>x[2]));
-$("bal").textContent=fmt(tp+ta-te+ADJ)+" ج";$("tp").textContent=fmt(tp);$("ta").textContent=fmt(ta);$("te").textContent=fmt(te);
-let tab="apt";
-function render(){let h="";
- if(tab=="apt"){$("nt").textContent="الرقم الكبير = إجمالي المدفوع من أول 2025. المطلوب من كل شقة حتى الآن: "+fmt(DUE_NOW)+" ج. آخر تحديث: "+UPDATED;
-  h=APTS.map((a,i)=>{const t=P25[i]+P26[i],d=DUE_NOW-t;return `<div class="it"><div class="m"><b>${i+1} · ${a[1]}</b><div class="s">الدور ${a[0]} · 2025: ${fmt(P25[i])} · 2026: ${fmt(P26[i])}</div></div><div style="text-align:left"><div class="n">${fmt(t)} ج</div><span class="pill ${d>0?"l":""}">${d>0?"متبقي "+fmt(d):d<0?"مقدّم "+fmt(-d):"خالص"}</span></div></div>`}).join("")}
- else{const arr=(tab=="exp"?E:A).slice().sort((a,b)=>b[0].localeCompare(a[0]));$("nt").textContent="آخر تحديث: "+UPDATED;
-  h=`<div class="bar"><b>${tab=="exp"?"المصروفات 2025+2026":"الإضافات"}</b><b>${fmt(tab=="exp"?te:ta)} ج</b></div>`+arr.map(x=>`<div class="it"><div class="m"><b>${x[1]}</b><div class="s">${x[0]}</div></div><div class="n ${tab=="exp"?"late":"ok"}">${tab=="exp"?"−":"+"}${fmt(x[2])}</div></div>`).join("")}
- $("list").innerHTML=h}
-document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));render()});
-render();
-if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
-</script></body></html>
+<link rel="stylesheet" href="/style.css"></head>
+<body><div id="app"></div><script src="/app.js"></script></body></html>
